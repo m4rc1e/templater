@@ -60,3 +60,8 @@ class WordTemplate(object):
         for doc in self._docs:
             doc.save('example_' + str(count) + '.docx')
             count += 1
+
+    @property
+    def docs(self):
+        '''Return the document list.'''
+        return self._docs
