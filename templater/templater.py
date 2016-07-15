@@ -3,7 +3,8 @@ import re
 from copy import copy
 from datetime import datetime
 from .docxml import Document
-import lxml
+from lxml import etree
+
 
 class WordTemplate(object):
 
@@ -16,6 +17,7 @@ class WordTemplate(object):
         self._get_docs()
 
     def _get_docs(self):
+        '''Create a Word document for each row in the Excel file.'''
         for row in range(len(self.excel_file)):
             doc = copy(self.template_file)
             self._xl_keys = dict(self.excel_file.iloc[row].to_dict())
@@ -41,6 +43,11 @@ class WordTemplate(object):
             return 'KEY MISSING'
 
     def _date(self, d_format):
+        '''Convert date template tags to locale based date. e.g:
+
+        {{ date yyyy/mm/dd }} => 2016/12/12
+        {{ date dd-mm-yyyy }} => 12-12-2016
+        '''
         today = datetime.now()
         date_format = d_format.split('date ')[-1]
         date = date_format.replace('yyyy', str(today.year))
@@ -48,10 +55,20 @@ class WordTemplate(object):
         date = date.replace('dd', str(today.day))
         return date
 
-    def export_single_file(self, file_output):
-        pass
+    def export_single_file(self, filename):
+        # Take _.docs[0] as master
+        master = copy(self.docs[0])
+        doc_xml = etree.XML(master.files['word/document.xml'])
+        for doc in self.docs[1:]:
+            xml = etree.XML(doc.files['word/document.xml'])
+            for element in xml[0]:
+                doc_xml[0].append(element)
+        master.files['word/document.xml'] = etree.tostring(doc_xml)
+        doc.save(filename)
 
     def export_multiple_files(self, file_output):
+        '''Export each file in self._docs. Filenames are numerically
+        increased.'''
         for i, doc in enumerate(self._docs):
             filename = file_output[:-4] + str(i) + '.docx'
             doc.save(filename)
