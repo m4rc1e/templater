@@ -1,13 +1,84 @@
+'''
+Write a template in Word and populate it with tabular Excel data. For each Row
+in the Excel file, a new Word document is produced.
+
+
+Templating language documentation:
+----------------------------------
+A simple templating language exists to pair the Word template keys to Excel's
+column keys.
+
+
+A key in the Word template is defined by placing the name of the Excel column
+between two curly braces, e.g:
+
+{{ Name }} -> Name
+
+Pairing is case sensitive so '{{ Name }}' will not match an Excel column
+called 'name'.
+
+Dates:
+There is a special key {{ date yyyy-mm-dd }}. This key will produce the
+current date, e.g:
+
+{{ date yyyy-mm-dd }} -> 2016-12-12
+
+The user is free to change the yyyy-mm-dd to any combination to suite their
+locatilty. '-' can also be replaced by '/'.
+e.g:
+
+{{ date dd/mm/yyyy }} -> 2016/12/12
+
+
+
+Complete Example:
+-----------------
+    ____________________________________________________________
+    Excel file:
+
+          Forename   Surname    Amount Due
+        0     Marc     Foley    100
+        1      Sam     Smith    230
+    ____________________________________________________________
+
+    ____________________________________________________________
+    Word Template:
+
+    Hello {{ Forename }} {{ Surname }},
+
+    Your invoice for {{ date yyyy-mm-dd }} is ${{ Amount Due }}.
+
+    Kind regards,
+    Tim
+    ____________________________________________________________
+
+    ____________________________________________________________
+    Output: (same for next Excel row but with Sam's row data)
+
+    Hello Marc Foley,
+
+    Your invoice for 2016-12-12 is $100.
+
+    Kind regards,
+    Tim
+    ____________________________________________________________
+
+'''
 import pandas as pd
 import re
 from copy import deepcopy
 from datetime import datetime
 from .docxml import Document
 from lxml import etree
+from . import components
+
+__author__ = 'Marc Foley'
+__version__ = 0.1
 
 
 class WordTemplate(object):
-
+    '''The output can either be a collection of files or all templates
+    collated together.'''
     def __init__(self, template_file, excel_file):
         self.template_file = template_file
         self.excel_file = pd.read_excel(excel_file)
@@ -33,12 +104,11 @@ class WordTemplate(object):
     def _tmpl_key_2_xl_key(self, matchobj):
         """convert the Word template key '{{ key }}' to the Excel key
         'key'"""
-        # Remove '"{{ " and " }}""
-        key = matchobj.group(0)[3:-3]
+        excel_key = matchobj.group(0)[3:-3]  # Remove '"{{ " and " }}""
         if key in self._xl_keys:
-            return str(self._xl_keys[key])
+            return str(self._xl_keys[excel_key])
         elif 'date' in key:
-            return self._date(key)
+            return self._date(excel_key)
         else:
             return 'KEY MISSING'
 
@@ -62,8 +132,11 @@ class WordTemplate(object):
         doc_xml = etree.XML(master.files['word/document.xml'])
 
         for doc in self.docs[1:]:
+            #  Insert a pagebreak for each document
+            doc_xml[0].append(deepcopy(components.page_break))
             xml = etree.XML(doc.files['word/document.xml'])
             for element in xml[0]:
+                # Append inside the <document> tag
                 doc_xml[0].append(element)
         master.files['word/document.xml'] = etree.tostring(doc_xml)
         master.save(filename)
