@@ -1,4 +1,3 @@
-from lxml import etree
 import shutil
 import os
 from zipfile import ZipFile
