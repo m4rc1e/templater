@@ -1,6 +1,6 @@
 import pandas as pd
 import re
-from copy import copy
+from copy import deepcopy
 from datetime import datetime
 from .docxml import Document
 from lxml import etree
@@ -9,7 +9,7 @@ from lxml import etree
 class WordTemplate(object):
 
     def __init__(self, template_file, excel_file):
-        self.template_file = Document(template_file)
+        self.template_file = template_file
         self.excel_file = pd.read_excel(excel_file)
         self._xl_keys = {}
         self._docs = []
@@ -19,7 +19,7 @@ class WordTemplate(object):
     def _get_docs(self):
         '''Create a Word document for each row in the Excel file.'''
         for row in range(len(self.excel_file)):
-            doc = copy(self.template_file)
+            doc = Document(self.template_file)
             self._xl_keys = dict(self.excel_file.iloc[row].to_dict())
             doc = self._populate_template(doc)
             self._docs.append(doc)
@@ -56,20 +56,22 @@ class WordTemplate(object):
         return date
 
     def export_single_file(self, filename):
-        # Take _.docs[0] as master
-        master = copy(self.docs[0])
+        '''Collate all files into one docx. A pagebreak is inserted
+        between each doc'''
+        master = deepcopy(self.docs[0])
         doc_xml = etree.XML(master.files['word/document.xml'])
+
         for doc in self.docs[1:]:
             xml = etree.XML(doc.files['word/document.xml'])
             for element in xml[0]:
                 doc_xml[0].append(element)
         master.files['word/document.xml'] = etree.tostring(doc_xml)
-        doc.save(filename)
+        master.save(filename)
 
     def export_multiple_files(self, file_output):
         '''Export each file in self._docs. Filenames are numerically
         increased.'''
-        for i, doc in enumerate(self._docs):
+        for i, doc in enumerate(self.docs):
             filename = file_output[:-4] + str(i) + '.docx'
             doc.save(filename)
 
