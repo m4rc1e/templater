@@ -1,6 +1,6 @@
 '''
 Primitive docx parser.
-
+======================
 
 Why not use python-docx?
 ------------------------

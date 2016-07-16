@@ -1,6 +1,7 @@
 '''
-Write a template in Word and populate it with tabular Excel data. For each Row
-in the Excel file, a new Word document is produced.
+Write a template in Word and populate it with tabular data from Excel.
+
+For each Row in the Excel file, a new Word document is created.
 
 
 Templating language documentation:
@@ -33,35 +34,35 @@ e.g:
 
 Complete Example:
 -----------------
-    ____________________________________________________________
-    Excel file:
+____________________________________________________________
+Excel file:
 
-          Forename   Surname    Amount Due
-        0     Marc     Foley    100
-        1      Sam     Smith    230
-    ____________________________________________________________
+      Forename   Surname    Amount Due
+    0     Marc     Foley    100
+    1      Sam     Smith    230
+____________________________________________________________
 
-    ____________________________________________________________
-    Word Template:
+____________________________________________________________
+Word Template:
 
-    Hello {{ Forename }} {{ Surname }},
+Hello {{ Forename }} {{ Surname }},
 
-    Your invoice for {{ date yyyy-mm-dd }} is ${{ Amount Due }}.
+Your invoice for {{ date yyyy-mm-dd }} is ${{ Amount Due }}.
 
-    Kind regards,
-    Tim
-    ____________________________________________________________
+Kind regards,
+Tim
+____________________________________________________________
 
-    ____________________________________________________________
-    Output: (same for next Excel row but with Sam's row data)
+____________________________________________________________
+Output: (same for next Excel row but with Sam's row data)
 
-    Hello Marc Foley,
+Hello Marc Foley,
 
-    Your invoice for 2016-12-12 is $100.
+Your invoice for 2016-12-12 is $100.
 
-    Kind regards,
-    Tim
-    ____________________________________________________________
+Kind regards,
+Tim
+____________________________________________________________
 
 '''
 import pandas as pd
@@ -77,8 +78,8 @@ __version__ = 0.1
 
 
 class WordTemplate(object):
-    '''The output can either be a collection of files or all templates
-    collated together.'''
+    '''Write either a single Word file of multiple word files from
+    a Word template and Excel file.'''
     def __init__(self, template_file, excel_file):
         self.template_file = template_file
         self.excel_file = pd.read_excel(excel_file)
@@ -92,22 +93,23 @@ class WordTemplate(object):
         for row in range(len(self.excel_file)):
             doc = Document(self.template_file)
             self._xl_keys = dict(self.excel_file.iloc[row].to_dict())
-            doc = self._populate_template(doc)
+            doc = self._replace_template_keys(doc)
             self._docs.append(doc)
 
-    def _populate_template(self, template):
+    def _replace_template_keys(self, template):
         '''Find a template tag and replace it with the tags key'''
         tmpl_key = re.compile(r'\{\{ [a-zA-Z\t \-\_]* \}\}')  # {{ key }}
-        template.replace_text(tmpl_key, self._tmpl_key_2_xl_key)  # {{ key }} -> key
+        # {{ key }} -> key
+        template.replace_text(tmpl_key, self._tmpl_key_2_xl_key)
         return template
 
     def _tmpl_key_2_xl_key(self, matchobj):
         """convert the Word template key '{{ key }}' to the Excel key
         'key'"""
         excel_key = matchobj.group(0)[3:-3]  # Remove '"{{ " and " }}""
-        if key in self._xl_keys:
+        if excel_key in self._xl_keys:
             return str(self._xl_keys[excel_key])
-        elif 'date' in key:
+        elif 'date' in excel_key:
             return self._date(excel_key)
         else:
             return 'KEY MISSING'
@@ -150,5 +152,5 @@ class WordTemplate(object):
 
     @property
     def docs(self):
-        '''Return the document list.'''
+        '''Return all the documents spawned from template and Excel file'''
         return self._docs
