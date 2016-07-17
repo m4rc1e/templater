@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Primitive docx parser.
 ======================
@@ -48,7 +49,7 @@ class Document(object):
     def replace_text(self, current, new):
         text = self._files['word/document.xml'].decode('utf-8')
         text = re.sub(current, new, text)
-        self._files['word/document.xml'] = bytes(text, 'utf-8')
+        self._files['word/document.xml'] = text.encode('utf-8')
 
     def save(self, path):
         with ZipFile(path, 'w') as doc:

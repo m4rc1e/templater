@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''Assorted elements for docx in xml format'''
 from lxml import etree
 
