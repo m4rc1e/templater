@@ -17,7 +17,7 @@ import re
 from os.path import basename
 
 
-class Document:
+class Document(object):
     '''
     Docx file is loaded via ZipFile and its files are stored in a dictionary
     which can be accessed by using Document.files.
