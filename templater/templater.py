@@ -1,80 +1,10 @@
-'''
-Write a template in Word and populate it with tabular data from Excel.
-
-For each Row in the Excel file, a new Word document is created.
-
-
-Templating language documentation:
-----------------------------------
-A simple templating language exists to pair the Word template keys to Excel's
-column keys.
-
-
-A key in the Word template is defined by placing the name of the Excel column
-between two curly braces, e.g:
-
-{{ Name }} -> Name
-
-Pairing is case sensitive so '{{ Name }}' will not match an Excel column
-called 'name'.
-
-Dates:
-There is a special key {{ date yyyy-mm-dd }}. This key will produce the
-current date, e.g:
-
-{{ date yyyy-mm-dd }} -> 2016-12-12
-
-The user is free to change the yyyy-mm-dd to any combination to suite their
-locatilty. '-' can also be replaced by '/'.
-e.g:
-
-{{ date dd/mm/yyyy }} -> 2016/12/12
-
-
-
-Complete Example:
------------------
-____________________________________________________________
-Excel file:
-
-      Forename   Surname    Amount Due
-    0     Marc     Foley    100
-    1      Sam     Smith    230
-____________________________________________________________
-
-____________________________________________________________
-Word Template:
-
-Hello {{ Forename }} {{ Surname }},
-
-Your invoice for {{ date yyyy-mm-dd }} is ${{ Amount Due }}.
-
-Kind regards,
-Tim
-____________________________________________________________
-
-____________________________________________________________
-Output: (same for next Excel row but with Sam's row data)
-
-Hello Marc Foley,
-
-Your invoice for 2016-12-12 is $100.
-
-Kind regards,
-Tim
-____________________________________________________________
-
-'''
 import pandas as pd
 import re
 from copy import deepcopy
 from datetime import datetime
-from .docxml import Document
 from lxml import etree
+from .docxml import Document
 from . import components
-
-__author__ = 'Marc Foley'
-__version__ = 0.1
 
 
 class WordTemplate(object):
