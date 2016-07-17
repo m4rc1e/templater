@@ -1,12 +1,15 @@
-# Word Templates:
+# Word Templater:
 
 Write a template in Word and populate it with tabular data from Excel.
 
 ## Features:
-* Generate Word documents from the rows of an Excel spreadsheet
-* Export documents into one .docx file or seperate files for each row
+* Generate Word documents from an Excel spreadsheet's rows
+* Export documents into one .docx file or seperate .docx files for each row
 * Template formatting is preserved
 
+## Installation
+
+    pip install git+https://github.com/m4rc1e/templater
 
 ## Templating Language:
 
@@ -46,7 +49,7 @@ w.export_single_file('output.docx')
 
 | Forename | Surname | Amount Due |
 | -------- | ------- | ---------- |
-| Marc     | Foley   | 100        |
+| Ben      | Jones   | 100        |
 | Sam      | Smith   | 230        |
 
 
@@ -62,7 +65,7 @@ Tim
 
 ### Output .docx
 ---
-Hello Marc Foley,
+Hello Ben Jones,
 
 Your invoice for 2016-12-12 is **$100**.
 
