@@ -3,7 +3,7 @@
 from datetime import datetime
 import os
 import shutil
-from templater import Document, WordTemplate, components
+from wordtemplater import Document, WordTemplate, components
 
 
 TEMPLATE = './tests/example1.docx'
