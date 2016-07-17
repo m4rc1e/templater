@@ -1,11 +1,14 @@
-from templater.docxml import Document
-from templater.templater import WordTemplate
+# from templater.docxml import Document
+# from templater.templater import WordTemplate
 from datetime import datetime
 import os
+import shutil
+from templater import Document, WordTemplate, components
+
 
 TEMPLATE = './tests/example1.docx'
 EXCEL = './tests/example1.xlsx'
-EXPORT_LOC = './tests/exports/'
+EXPORT_LOC = './tests/_exports/'
 
 
 def test_docs():
@@ -40,14 +43,20 @@ def test_convert_template_key_2_excel_column_name():
 
 
 def test_single_doc_export():
+    '''Create temporary export folder and output a single document containing all
+    templated documents'''
+    os.mkdir(EXPORT_LOC)
     w = WordTemplate(TEMPLATE, EXCEL)
-    w.export_single_file('./tests/exports/master.docx')
-    assert 'master.docx' in os.listdir('./tests/exports/')
-    os.remove('./tests/exports/master.docx')
+    w.export_single_file(EXPORT_LOC + 'master.docx')
+    assert 'master.docx' in os.listdir(EXPORT_LOC)
+    shutil.rmtree(EXPORT_LOC)
 
 
 def test_multiple_doc_export():
+    '''Create temprary export folder and output each templated document'''
+    os.mkdir(EXPORT_LOC)
     w = WordTemplate(TEMPLATE, EXCEL)
     w.export_multiple_files(EXPORT_LOC + 'file.docx')
     assert len(os.listdir(EXPORT_LOC)) >= 3
     [os.remove(EXPORT_LOC + f) for f in os.listdir(EXPORT_LOC)]
+    shutil.rmtree(EXPORT_LOC)
