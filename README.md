@@ -35,7 +35,7 @@ e.g:
 
 ## Example:
 ```
-from templater import WordTemplate
+from wordtemplater import WordTemplate
 
 w = WordTemplate('word-file.docx', 'excel_file.xlsx')
 w.export_single_file('output.docx')
