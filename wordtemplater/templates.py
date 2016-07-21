@@ -84,6 +84,8 @@ class WordTemplate(object):
                 cache = BytesIO()
                 file.save(cache)
                 cache.seek(0)
+                if not isinstance(file_output, str):
+                    file_output = 'file'
                 docx_name = '%s_%s.docx' % (file_output.split('.')[0], str(i))
                 zip_file.writestr(docx_name, cache.read())
 
