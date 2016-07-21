@@ -69,7 +69,7 @@ Hello Ben Jones,
 
 Your invoice for 2016-12-12 is **$100**.
 
-Kind regards,
+Regards,
 Tim
 
 
