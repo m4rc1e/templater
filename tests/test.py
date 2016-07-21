@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import shutil
 from wordtemplater import Document, WordTemplate, components
+from zipfile import ZipFile
 
 
 TEMPLATE = './tests/example1.docx'
@@ -56,7 +57,10 @@ def test_multiple_doc_export():
     '''Create temprary export folder and output each templated document'''
     os.mkdir(EXPORT_LOC)
     w = WordTemplate(TEMPLATE, EXCEL)
-    w.export_multiple_files(EXPORT_LOC + 'file.docx')
-    assert len(os.listdir(EXPORT_LOC)) >= 3
+    w.export_multiple_files(EXPORT_LOC + 'file.zip')
+    
+    with ZipFile(EXPORT_LOC + 'file.zip', 'r') as zip_file:
+        zip_contents = [f.filename for f in zip_file.filelist]
+        assert len(zip_contents) >= 3
     [os.remove(EXPORT_LOC + f) for f in os.listdir(EXPORT_LOC)]
     shutil.rmtree(EXPORT_LOC)

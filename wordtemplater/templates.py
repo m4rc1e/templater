@@ -7,7 +7,8 @@ from datetime import datetime
 from lxml import etree
 from .docxml import Document
 from . import components
-
+from zipfile import ZipFile
+from io import BytesIO
 
 class WordTemplate(object):
     '''Write either a single Word file of multiple word files from
@@ -76,11 +77,15 @@ class WordTemplate(object):
         master.save(filename)
 
     def export_multiple_files(self, file_output):
-        '''Export each file in self._docs. Filenames are numerically
-        increased.'''
-        for i, doc in enumerate(self.docs):
-            filename = file_output[:-4] + str(i) + '.docx'
-            doc.save(filename)
+        '''Export each file in self._docs into a zipfile. Filenames are
+        numerically increased.'''
+        with ZipFile(file_output, 'a') as zip_file:
+            for i, file in enumerate(self.docs):
+                cache = BytesIO()
+                file.save(cache)
+                cache.seek(0)
+                docx_name = '%s_%s.docx' % (file_output.split('.')[0], str(i))
+                zip_file.writestr(docx_name, cache.read())
 
     @property
     def docs(self):
